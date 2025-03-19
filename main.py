@@ -3,6 +3,9 @@ import gc
 from pygame.locals import *
 from towers import *
 pygame.init()
+size = 1
+scalingdirection = 1
+clock = pygame.time.Clock()
 current_tower = 1
 reallength = 320
 realheight = 180
@@ -10,7 +13,6 @@ white = (255,255,255)
 red = (255,0,0)
 green = (0,255,0)
 blue = (0,0,255)
-testRed({"x":2,"y":3})
 scaledlength = 960
 scaledheight = 540
 scaledwindow = pygame.display.set_mode((scaledlength,scaledheight))
@@ -34,15 +36,33 @@ def darken_colour(ogcolour):
 
 def check_towerselection():
     y = 0
+    global size
+    global scalingdirection
     button_rect = 0
     for towertype in fetch_alltowertypes():
-        button_surf = pygame.Surface((48,30))
-        if button_rect.collidepoint(mouse_pos[0], mouse_pos[1]):
-            hovered = true
-        button_rect = pygame.Rect(20, (y*20), 48,30)
+        hovered = False
         colour = towertype.colour
-        pygame.draw.rect(button_surf,colour,button_rect)
-        realwindow.blit(button_surf,(48,30))
+        button_surf = pygame.Surface((60, 20))
+        button_surf.fill(colour)
+        button_rect = button_surf.get_rect(center=(40, y * 20 + 46))
+        if button_rect.collidepoint(mouse_pos[0], mouse_pos[1]):
+            hovered = True
+        if hovered == True:
+            button_surf.set_alpha(128)
+            button_surf = pygame.transform.scale_by(button_surf,size)
+            if size >= 1.1:
+                scalingdirection = -1
+            if size < 1.1 and scalingdirection == 1:
+                size += 0.005
+            if scalingdirection == -1:
+                size -= 0.005
+            if size <= 1:
+                scalingdirection = 1
+            print(size)
+            print(scalingdirection)
+        else:
+            button_surf.set_alpha(255)
+        realwindow.blit(button_surf,button_rect)
         y += 1
 def update_grid(gridvar):
     y = 0
@@ -50,7 +70,7 @@ def update_grid(gridvar):
         hovered = False
         x = 0
         for tile in row:
-            tile_rect = pygame.Rect((x*24) + 52, (y*24) + 46, 24, 24)
+            tile_rect = pygame.Rect((x*24) + 100, (y*24) + 30, 24, 24)
             if tile_rect.collidepoint(mouse_pos[0], mouse_pos[1]):
                 hovered = True
             if tile == 0:
@@ -80,16 +100,17 @@ def update_grid(gridvar):
             x += 1
         y += 1
     for i in range(6):
-        pygame.draw.line(realwindow,(0,0,0),(52,i*24 + 46),(24*9 + 52,i*24 + 46))
+        pygame.draw.line(realwindow,(0,0,0),(100,i*24 + 30),(24*9 + 100,i*24 + 30))
     for i in range(10):
-        pygame.draw.line(realwindow,(0,0,0),(i*24 + 52,46),(i*24 + 52,5*24 + 46))
+        pygame.draw.line(realwindow,(0,0,0),(i*24 + 100,30),(i*24 + 100,5*24 + 30))
 
 running = True
 while running == True:
+    deltatime = clock.tick(60)
     realwindow.fill((255,255,255))
-    check_towerselection()
     mouse_pos = pygame.mouse.get_pos()
     mouse_pos = (mouse_pos[0]*(320/scaledlength), mouse_pos[1]*(180/scaledheight))
+    check_towerselection()
     update_grid(grid)
     scaledwindow.blit(pygame.transform.scale(realwindow, (scaledlength,scaledheight)), position)
     pygame.display.update()
