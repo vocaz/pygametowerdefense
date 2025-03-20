@@ -2,6 +2,7 @@ import pygame
 import gc
 from pygame.locals import *
 from towers import *
+click = 0
 pygame.init()
 size = 1
 scalingdirection = 1
@@ -36,6 +37,7 @@ def darken_colour(ogcolour):
 
 def check_towerselection():
     y = 0
+    global current_tower
     global size
     global scalingdirection
     button_rect = 0
@@ -58,8 +60,9 @@ def check_towerselection():
                 size -= 0.005
             if size <= 1:
                 scalingdirection = 1
-            print(size)
-            print(scalingdirection)
+            if click == 1:
+                current_tower = towertype
+                print(current_tower)
         else:
             button_surf.set_alpha(255)
         realwindow.blit(button_surf,button_rect)
@@ -70,6 +73,7 @@ def update_grid(gridvar):
         hovered = False
         x = 0
         for tile in row:
+            cords = {"x":x,"y":y}
             tile_rect = pygame.Rect((x*24) + 100, (y*24) + 30, 24, 24)
             if tile_rect.collidepoint(mouse_pos[0], mouse_pos[1]):
                 hovered = True
@@ -78,24 +82,14 @@ def update_grid(gridvar):
                     pygame.draw.rect(realwindow,(150,150,150),tile_rect)
                 else:
                     pygame.draw.rect(realwindow,white,tile_rect)
-            if tile == 1:
+            if isinstance(tile,Tower):
                 if hovered == True:
-                    pygame.draw.rect(realwindow,darken_colour(red),tile_rect)
+                    pygame.draw.rect(realwindow,darken_colour(tile.colour),tile_rect)
                 else:
-                    pygame.draw.rect(realwindow,red,tile_rect)
-            if tile == 2:
-                if hovered == True:
-                    pygame.draw.rect(realwindow,darken_colour(green),tile_rect)
-                else:
-                    pygame.draw.rect(realwindow,green,tile_rect)
-            if tile == 3:
-                if hovered == True:
-                    pygame.draw.rect(realwindow,darken_colour(blue),tile_rect)
-                else:
-                    pygame.draw.rect(realwindow,blue,tile_rect)
+                    pygame.draw.rect(realwindow,tile.colour,tile_rect)
             if hovered == True:
-                if pygame.mouse.get_pressed()[0]:
-                    grid[y][x] = current_tower
+                if click == 1:
+                    grid[y][x] = current_tower(cords)
             hovered = False
             x += 1
         y += 1
@@ -106,14 +100,11 @@ def update_grid(gridvar):
 
 running = True
 while running == True:
+    click = 0
     deltatime = clock.tick(60)
     realwindow.fill((255,255,255))
     mouse_pos = pygame.mouse.get_pos()
     mouse_pos = (mouse_pos[0]*(320/scaledlength), mouse_pos[1]*(180/scaledheight))
-    check_towerselection()
-    update_grid(grid)
-    scaledwindow.blit(pygame.transform.scale(realwindow, (scaledlength,scaledheight)), position)
-    pygame.display.update()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             realwindow.fill((0,0,0))
@@ -126,14 +117,20 @@ while running == True:
             running = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
-                print_grid(grid)
+                print(Tower.instances)
             elif event.key == pygame.K_r:
                 grid = reset_grid()
                 print_grid(grid)
             elif event.key == pygame.K_1:
-                current_tower = 1
+                current_tower = testRed
             elif event.key == pygame.K_2:
-                current_tower = 2
+                current_tower = testGreen
             elif event.key == pygame.K_3:
                 current_tower = 3
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            click = 1    
+    check_towerselection()
+    update_grid(grid)
+    scaledwindow.blit(pygame.transform.scale(realwindow, (scaledlength,scaledheight)), position)
+    pygame.display.update()
 pygame.quit()
