@@ -1,5 +1,6 @@
 import pygame
 import gc
+from ui_icons import *
 from pygame.locals import *
 from towers import *
 click = 0
@@ -25,6 +26,13 @@ grid = [[0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0]]
 position = (0,0)
+
+def reset_grid(gridvar):
+    grid = [[0,0,0,0,0,0,0,0,0],
+        [0,2,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0]]
 def fetch_alltowertypes():
     result = (Tower.__subclasses__())
     return(result)
@@ -49,8 +57,8 @@ def check_towerselection():
         button_rect = button_surf.get_rect(center=(40, y * 20 + 46))
         if button_rect.collidepoint(mouse_pos[0], mouse_pos[1]):
             hovered = True
-        if hovered == True:
-            button_surf.set_alpha(128)
+        if hovered == True and current_tower != towertype:
+            button_surf.set_alpha(255)
             button_surf = pygame.transform.scale_by(button_surf,size)
             if size >= 1.1:
                 scalingdirection = -1
@@ -62,9 +70,11 @@ def check_towerselection():
                 scalingdirection = 1
             if click == 1:
                 current_tower = towertype
-                print(current_tower)
         else:
+            button_surf.set_alpha(50)
+        if towertype == current_tower:
             button_surf.set_alpha(255)
+            button_surf = pygame.transform.scale_by(button_surf,1.1)
         realwindow.blit(button_surf,button_rect)
         y += 1
 def update_grid(gridvar):
@@ -117,16 +127,18 @@ while running == True:
             running = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
-                print(Tower.instances)
+                tower_cords = []
+                for instance in Tower.instances:
+                    tower_cords.append(f'{instance.name}:{instance.cords}')
+                print(tower_cords)
             elif event.key == pygame.K_r:
-                grid = reset_grid()
-                print_grid(grid)
+                grid = reset_grid(grid)
             elif event.key == pygame.K_1:
                 current_tower = testRed
             elif event.key == pygame.K_2:
                 current_tower = testGreen
             elif event.key == pygame.K_3:
-                current_tower = 3
+                current_tower = testBlue
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             click = 1    
     check_towerselection()

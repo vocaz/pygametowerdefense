@@ -28,3 +28,10 @@ class testGreen(Tower):
     def __init__(self,new_cords):
         Tower.__init__(self,new_cords)
         testGreen.instances.append(self)
+class testBlue(Tower):
+    colour = (0,0,255)
+    name = 'Blue'
+    instances = []
+    def __init__(self,new_cords):
+        Tower.__init__(self,new_cords)
+        testGreen.instances.append(self)
