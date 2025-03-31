@@ -3,7 +3,9 @@ import gc
 from assets import *
 from towers import *
 
-##assets
+
+pos = 0
+mouse_pos = []
 click = 0
 pygame.init()
 size = 1
@@ -20,6 +22,7 @@ scaledlength = 960
 scaledheight = 540
 scaledwindow = pygame.display.set_mode((scaledlength,scaledheight))
 realwindow = pygame.Surface((reallength,realheight))
+assets.load()
 font = pygame.font.Font(None,40)
 grid = [[0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0],
@@ -27,6 +30,9 @@ grid = [[0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0]]
 position = (0,0)
+cursor = pygame.Surface((5,5))
+cursor.fill((255,255,255))
+cursor_mask = pygame.mask.from_surface(cursor)
 def draw_centretext(text,colour):
     realwindow.fill((0,0,0))
     closing_text = font.render(text, True, colour)
@@ -37,22 +43,43 @@ def draw_centretext(text,colour):
 def reset_towerselection():
     global current_tower
     current_tower = 0
-def reset_grid(gridvar):
+def reset_grid():
+    global grid
     grid = [[0,0,0,0,0,0,0,0,0],
-        [0,2,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0]]
 def fetch_alltowertypes():
     result = (Tower.__subclasses__())
-    return(result)
+    return result
 def darken_colour(ogcolour):
     darkenedcolour = list(ogcolour)
     for i in range (0,3):
         darkenedcolour[i] = darkenedcolour[i]/2
     darkenedcolour = tuple(darkenedcolour)
-    return(darkenedcolour)
+    return darkenedcolour
+def get_pos(isscaled):
+    global mouse_pos
+    result = 0
+    if isscaled == 1:
+        result = (mouse_pos[0]*(320/scaledlength), mouse_pos[1]*(180/scaledheight))
+    else:
+        result = mouse_pos
+    return(result)
 
+def check_tomato():
+    keyed_tomato = assets.Images["tomato"][0]
+    keyed_tomato = pygame.transform.scale(keyed_tomato, (40,40))
+    tomato_mask = pygame.mask.from_surface(keyed_tomato)
+    tomato_mask = tomato_mask.scale((120,120))
+    tomato_rect = keyed_tomato.get_rect(bottomright=(960,540))
+    if tomato_mask.overlap(cursor_mask, (get_pos(0)[0],get_pos(0)[1])):
+        print(get_pos(0))
+    else:
+        print(get_pos(0))
+        print('not over')
+    scaledwindow.blit(keyed_tomato, tomato_rect)
 def check_towerselection():
     y = 0
     global current_tower
@@ -65,7 +92,7 @@ def check_towerselection():
         button_surf = pygame.Surface((60, 20))
         button_surf.fill(colour)
         button_rect = button_surf.get_rect(center=(40, y * 20 + 46))
-        if button_rect.collidepoint(mouse_pos[0], mouse_pos[1]):
+        if button_rect.collidepoint(get_pos(1)[0], get_pos(1)[1]):
             hovered = True
         if hovered == True:
             if current_tower != towertype:
@@ -100,7 +127,7 @@ def update_grid(gridvar):
             cords = {"x":x,"y":y}
             tile_surf = pygame.Surface((24,24))
             tile_rect = tile_surf.get_rect(topleft=(((x*24) + 100),((y*24) + 30)))
-            if tile_rect.collidepoint(mouse_pos[0], mouse_pos[1]):
+            if tile_rect.collidepoint(get_pos(1)[0], get_pos(1)[1]):
                 hovered = True
             if tile == 0:
                 if hovered == True:
@@ -115,11 +142,7 @@ def update_grid(gridvar):
             if hovered == True:
                 if click == 1:
                     if current_tower == 0:
-                        invalid = font.render("goodbye", True, (0,255,0))
-                        closing_text_rect = closing_text.get_rect()
-                        closing_text_rect.center = (reallength // 2, realheight // 2)
-                        realwindow.blit(closing_text, closing_text_rect)
-                        scaledwindow.blit(pygame.transform.scale(realwindow, (scaledlength,scaledheight)), position)
+                        pass
                     else:
                         grid[y][x] = current_tower(cords)
             hovered = False
@@ -136,9 +159,6 @@ while running == True:
     deltatime = clock.tick(60)
     realwindow.fill((255,255,255))
     mouse_pos = pygame.mouse.get_pos()
-    mouse_pos = (mouse_pos[0]*(320/scaledlength), mouse_pos[1]*(180/scaledheight))
-    check_towerselection()
-    update_grid(grid)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             draw_centretext("Closing...",(255,255,255))
@@ -151,7 +171,7 @@ while running == True:
                     tower_cords.append(f'{instance.name}:{instance.cords}')
                 print(tower_cords)
             elif event.key == pygame.K_r:
-                grid = reset_grid(grid)
+                reset_grid()
             elif event.key == pygame.K_1:
                 if current_tower == testRed:
                     reset_towerselection()
@@ -169,6 +189,11 @@ while running == True:
                     current_tower = testBlue
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             click = 1
-    scaledwindow.blit(pygame.transform.scale(realwindow, (scaledlength,scaledheight)), position)
+            print(click)
+    check_towerselection()
+    update_grid(grid)
+    newwindow = pygame.transform.scale_by(realwindow,3) 
+    scaledwindow.blit(newwindow, position)
+    check_tomato()
     pygame.display.update()
 pygame.quit()
