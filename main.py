@@ -3,26 +3,33 @@ import gc
 from assets import *
 from towers import *
 
-
-pos = 0
-mouse_pos = []
-click = 0
-pygame.init()
-size = 1
-scalingdirection = 1
-clock = pygame.time.Clock()
-current_tower = 0
-reallength = 320
-realheight = 180
+#colours
 white = (255,255,255)
 red = (255,0,0)
 green = (0,255,0)
 blue = (0,0,255)
+
+#input handling
+pos = 0
+mouse_pos = []
+click = 0
+
+#pygame setup
+clock = pygame.time.Clock()
+reallength = 320
+realheight = 180
 scaledlength = 960
 scaledheight = 540
 scaledwindow = pygame.display.set_mode((scaledlength,scaledheight))
 realwindow = pygame.Surface((reallength,realheight))
+pygame.init()
+
+#globals
+size = 1
+scalingdirection = 1
 assets.load()
+current_tower = 0
+is_tomatoing = False
 font = pygame.font.Font(None,40)
 grid = [[0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0],
@@ -67,19 +74,30 @@ def get_pos(isscaled):
     else:
         result = mouse_pos
     return(result)
-
+def get_scalefactor():
+    result = scaledheight/realheight
+    return(result)
 def check_tomato():
+    global is_tomatoing
+    sf = get_scalefactor()
     keyed_tomato = assets.Images["tomato"][0]
-    keyed_tomato = pygame.transform.scale(keyed_tomato, (40,40))
-    tomato_mask = pygame.mask.from_surface(keyed_tomato)
-    tomato_mask = tomato_mask.scale((120,120))
-    tomato_rect = keyed_tomato.get_rect(bottomright=(960,540))
-    if tomato_mask.overlap(cursor_mask, (get_pos(0)[0],get_pos(0)[1])):
-        print(get_pos(0))
-    else:
-        print(get_pos(0))
-        print('not over')
-    scaledwindow.blit(keyed_tomato, tomato_rect)
+    tomato_scaled_size = (80,80)
+    if is_tomatoing == True:
+        tomato_scaled_size = (80*1.2,80*1.2)
+    tomato_size = (tomato_scaled_size[0]/sf,tomato_scaled_size[1]/sf)
+    keyed_tomato_scaled = pygame.transform.scale(keyed_tomato, tomato_scaled_size)
+    keyed_tomato_unscaled = pygame.transform.scale(keyed_tomato, tomato_size)
+    tomato_mask = pygame.mask.from_surface(keyed_tomato_unscaled)
+    tomato_rect_unscaled = keyed_tomato_unscaled.get_rect(bottomright=(320,180))
+    tomato_rect_scaled = keyed_tomato_scaled.get_rect(bottomright=(scaledlength,scaledheight))
+    if tomato_mask.overlap(cursor_mask, (get_pos(1)[0] - tomato_rect_unscaled.x, get_pos(1)[1] - tomato_rect_unscaled.y)):
+        if click == 1:
+            if is_tomatoing == False:
+                is_tomatoing = True
+            elif is_tomatoing == True:
+                is_tomatoing = False
+            print(is_tomatoing)
+    scaledwindow.blit(keyed_tomato_scaled, tomato_rect_scaled)
 def check_towerselection():
     y = 0
     global current_tower
@@ -119,6 +137,8 @@ def check_towerselection():
         realwindow.blit(button_surf,button_rect)
         y += 1
 def update_grid(gridvar):
+    global click
+    global is_tomatoing
     hovered = False
     y = 0
     for row in gridvar:
@@ -141,10 +161,17 @@ def update_grid(gridvar):
                 realwindow.blit(tile_surf,tile_rect)
             if hovered == True:
                 if click == 1:
-                    if current_tower == 0:
-                        pass
+                    if is_tomatoing == True:
+                        if tile != 0:
+                            print(f'Tomatoed {tile.name}')
+                            del tile
+                            grid[y][x] = 0
+                            is_tomatoing = False
                     else:
-                        grid[y][x] = current_tower(cords)
+                        if current_tower == 0:
+                            pass
+                        else:
+                            grid[y][x] = current_tower(cords)
             hovered = False
             x += 1
         y += 1
@@ -189,10 +216,9 @@ while running == True:
                     current_tower = testBlue
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             click = 1
-            print(click)
     check_towerselection()
     update_grid(grid)
-    newwindow = pygame.transform.scale_by(realwindow,3) 
+    newwindow = pygame.transform.scale_by(realwindow,3)
     scaledwindow.blit(newwindow, position)
     check_tomato()
     pygame.display.update()
