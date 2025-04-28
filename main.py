@@ -1,9 +1,14 @@
 import pygame
 import gc
+import random
+from monsters import *
 from assets import *
 from towers import *
 dospawn = 1
+monster_timer = 1
 lanecount = {0:0,1:0,2:0,3:0,4:0}
+lastspawnedlane = 0
+monsters = []
 #colours
 white = (255,255,255)
 red = (255,0,0)
@@ -41,8 +46,15 @@ position = (0,0)
 cursor = pygame.Surface((5,5))
 cursor.fill((255,255,255))
 cursor_mask = pygame.mask.from_surface(cursor)
-def spawn_zombie():
-    lane = random.randint
+def spawn_monster():
+    lanes = [0,1,2,3,4]
+    try:
+        lanes.remove(lastspawnedlane)
+    except:
+        pass
+    spawnlane = random.choice(lanes)
+    lastspawnedlane = spawnlane
+    monsters.append(RobZombie(spawnlane))
 def draw_centretext(text,colour):
     realwindow.fill((0,0,0))
     closing_text = font.render(text, True, colour)
@@ -186,7 +198,7 @@ def update_grid(gridvar):
 running = True
 while running == True:
     if dospawn == 1:
-        spawn_zombie()
+        spawn_monster()
         dospawn = 0
     click = 0
     deltatime = clock.tick(60)

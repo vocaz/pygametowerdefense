@@ -2,17 +2,16 @@ import pygame
 from pygame.locals import *
 
 class Monster:
+    typeid = -1
     health = -1
     movespeed = -1
     damage = -1
     armor = -1
     hasarmor = False
     totalhp = health + armor
-    instances = []
     surface = []
     def __init__(self,lane):
-        self.cords = {"x":9,"y":lane}
-        Monster.instances.append(self)
+        self.cords = {"x":320,"y":(lane*24) + 43 - 7}
     def tryeat(self,towervar):
         #runs when collides with tower
         #towervar is the variable assigned with the object of the tower that monster collides with
@@ -29,7 +28,6 @@ class Monster:
         hasarmor = False
         armor = 0
 class RobZombie(monster):
-    instances = []
     def __init__(self,lane):
         health = 190
         armor = 1100
@@ -37,5 +35,5 @@ class RobZombie(monster):
         damage = 100
         Monster.__init__(self,lane)
         hasarmor = True
-        RobZombie.instances.append(self)
+        typeid = 1
         

@@ -1,6 +1,6 @@
 import pygame
-from pygame.locals import *
 
+from pygame.locals import *
 class Tower:
     cost = -1 #cost in fans per placement
     range = -1
