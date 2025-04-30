@@ -190,6 +190,7 @@ def update_grid(gridvar):
             hovered = False
             x += 1
         y += 1
+    
     for i in range(6):
         pygame.draw.line(realwindow,(0,0,0),(100,i*24 + 30),(24*9 + 100,i*24 + 30))
     for i in range(10):

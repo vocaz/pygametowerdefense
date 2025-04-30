@@ -13,7 +13,10 @@ class Tower:
     def __init__(self,new_cords):
         self.cords = new_cords
         Tower.instances.append(self)
-
+    def rect(self):
+        return pygame.Rect((self.cords[0]*24) + 56, (self.cords[1]*24) + 50, 16, 16)
+    def ishit(self):
+        print('hit')
 class testRed(Tower):
     colour = (255,0,0)
     name = 'Red'
