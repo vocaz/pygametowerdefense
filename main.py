@@ -6,7 +6,6 @@ from assets import *
 from towers import *
 dospawn = 1
 monster_timer = 1
-lanecount = {0:0,1:0,2:0,3:0,4:0}
 lastspawnedlane = 0
 monsters = []
 #colours
@@ -46,6 +45,14 @@ position = (0,0)
 cursor = pygame.Surface((5,5))
 cursor.fill((255,255,255))
 cursor_mask = pygame.mask.from_surface(cursor)
+def draw_monsters():
+    global grid
+    global monsters
+    monster_lanes = [False, False, False, False, False]
+    for index, monster in sorted(enumerate(monsters), reverse = True):
+        monster.update(grid)
+        monster.draw(realwindow)
+        monster_lanes[monster.lane] = True
 def spawn_monster():
     lanes = [0,1,2,3,4]
     try:
@@ -237,8 +244,10 @@ while running == True:
             click = 1
     check_towerselection()
     update_grid(grid)
+    draw_monsters()
     newwindow = pygame.transform.scale_by(realwindow,3)
     scaledwindow.blit(newwindow, position)
     check_tomato()
     pygame.display.update()
+    print(get_pos(1))
 pygame.quit()
