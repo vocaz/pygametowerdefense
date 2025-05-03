@@ -12,6 +12,7 @@ class Monster:
     hasarmor = False
     totalhp = health + armor
     surface = []
+    last_attack_time = 0
     time_next_attack = 0
     ismoving = True
     def __init__(self,lane):
@@ -26,11 +27,14 @@ class Monster:
                     self.tryeat(tower)
         if self.ismoving:
             self.cords["x"] -= self.movespeed
-    def tryeat(self,towervar): 
-        curtime = time.time()
-        self.time_next_attack = curtime + self.cooldown
-        if curtime >= self.time_next_attack:
-            towervar.ishit(damage)
+    def tryeat(self,towervar):
+        if self.last_attack_time == 0:
+            self.last_attack_time = time.time()
+            self.time_next_attack = self.last_attack_time + self.cooldown
+        if time.time() >= self.time_next_attack:
+            print('attack')
+            towervar.ishit(self.damage)
+            self.last_attack_time = 0
     def ishit(self,damage):
         #Runs when either collides with a projectile or is hit by a melee range character
         if hasarmor == True:

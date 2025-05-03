@@ -45,6 +45,13 @@ position = (0,0)
 cursor = pygame.Surface((5,5))
 cursor.fill((255,255,255))
 cursor_mask = pygame.mask.from_surface(cursor)
+def kill_tower(towervar):
+    target_cords = [towervar.cords["x"], towervar.cords["y"]]
+    global grid
+    print(f'{towervar} killed')
+    del towervar
+    grid[target_cords[1]][target_cords[0]] = 0
+
 def draw_monsters():
     global grid
     global monsters
@@ -177,10 +184,18 @@ def update_grid(gridvar):
                 else:
                     pygame.draw.rect(realwindow,white,tile_rect)
             if isinstance(tile,Tower):
-                tile_surf.fill(tile.colour)
-                if hovered == True:
-                    tile_surf.set_alpha(120)
-                realwindow.blit(tile_surf,tile_rect)
+                if tile.health <= 0:
+                    kill_tower(tile)
+                else:
+                    tile_surf = tile.img
+                    tile_surf = pygame.transform.scale_by(tile_surf,(1.5))
+                    sprite_rect = tile_surf.get_rect(center = tile_rect.center)
+                    sprite_rect.move_ip(0,-10)
+                    if hovered == True:
+                        tile_surf.set_alpha(120)
+                    else:
+                        tile_surf.set_alpha(255)
+                    realwindow.blit(tile_surf,sprite_rect)
             if hovered == True:
                 if click == 1:
                     if is_tomatoing == True:
@@ -236,10 +251,10 @@ while running == True:
                 else:
                     current_tower = testGreen
             elif event.key == pygame.K_3:
-                if current_tower == testBlue:
+                if current_tower == tambourine:
                     reset_towerselection()
                 else:
-                    current_tower = testBlue
+                    current_tower = tambourine
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             click = 1
     check_towerselection()
