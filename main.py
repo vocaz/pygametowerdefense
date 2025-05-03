@@ -4,7 +4,11 @@ import random
 from monsters import *
 from assets import *
 from towers import *
+
+#testing variables
 dospawn = 1
+
+#spawn system
 monster_timer = 1
 lastspawnedlane = 0
 monsters = []
@@ -42,9 +46,13 @@ grid = [[0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0]]
 position = (0,0)
+
+#mouse for mask collision setup
 cursor = pygame.Surface((5,5))
 cursor.fill((255,255,255))
 cursor_mask = pygame.mask.from_surface(cursor)
+
+
 def kill_tower(towervar):
     target_cords = [towervar.cords["x"], towervar.cords["y"]]
     global grid
@@ -188,9 +196,8 @@ def update_grid(gridvar):
                     kill_tower(tile)
                 else:
                     tile_surf = tile.img
-                    tile_surf = pygame.transform.scale_by(tile_surf,(1.5))
                     sprite_rect = tile_surf.get_rect(center = tile_rect.center)
-                    sprite_rect.move_ip(0,-10)
+                    sprite_rect.move_ip(0,-11)
                     if hovered == True:
                         tile_surf.set_alpha(120)
                     else:
