@@ -14,10 +14,14 @@ class Tower:
         self.cords = new_cords
         Tower.instances.append(self)
     def rect(self):
-        return pygame.Rect((self.cords[0]*24) + 56, (self.cords[1]*24) + 50, 16, 16)
-    def ishit(self):
-        print('hit')
+        tile_surf = pygame.Surface((24,24))
+        tile_rect = tile_surf.get_rect(topleft=(((self.cords["x"]*24) + 100),((self.cords["y"]*24) + 30)))
+        return tile_rect
+    def ishit(dmg):
+        self.health -= dmg
+        print(f'hit for {health}')
 class testRed(Tower):
+    health = 300
     colour = (255,0,0)
     name = 'Red'
     instances = []
@@ -25,6 +29,7 @@ class testRed(Tower):
         Tower.__init__(self,new_cords)
         testRed.instances.append(self)
 class testGreen(Tower):
+    health = 300
     colour = (0,255,0)
     name = 'Green'
     instances = []
@@ -32,6 +37,7 @@ class testGreen(Tower):
         Tower.__init__(self,new_cords)
         testGreen.instances.append(self)
 class testBlue(Tower):
+    health = 300
     colour = (0,0,255)
     name = 'Blue'
     instances = []

@@ -1,7 +1,9 @@
 import pygame
+import time
 from pygame.locals import *
 from assets import *
 class Monster:
+    cooldown = 1
     typeid = -1
     health = -1
     movespeed = -1
@@ -10,6 +12,7 @@ class Monster:
     hasarmor = False
     totalhp = health + armor
     surface = []
+    time_next_attack = 0
     ismoving = True
     def __init__(self,lane):
         self.cords = {"x":304,"y":(lane*24)+24}
@@ -19,14 +22,15 @@ class Monster:
         for tower in grid[self.lane]:
             if tower != 0:
                 if self.rect().colliderect(tower.rect()):
-                    self.moving = False
-                    tower.ishit()
+                    self.ismoving = False
+                    self.tryeat(tower)
         if self.ismoving:
             self.cords["x"] -= self.movespeed
-    def tryeat(self,towervar):
-        #runs when collides with tower
-        #towervar is the variable assigned with the object of the tower that monster collides with
-        towervar.ishit(damage)
+    def tryeat(self,towervar): 
+        curtime = time.time()
+        self.time_next_attack = curtime + self.cooldown
+        if curtime >= self.time_next_attack:
+            towervar.ishit(damage)
     def ishit(self,damage):
         #Runs when either collides with a projectile or is hit by a melee range character
         if hasarmor == True:

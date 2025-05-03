@@ -249,5 +249,4 @@ while running == True:
     scaledwindow.blit(newwindow, position)
     check_tomato()
     pygame.display.update()
-    print(get_pos(1))
 pygame.quit()
