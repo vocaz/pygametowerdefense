@@ -29,9 +29,9 @@ class Monster:
             self.cords["x"] -= self.movespeed
     def tryeat(self,towervar):
         if self.last_attack_time == 0:
-            self.last_attack_time = time.time()
-            self.time_next_attack = self.last_attack_time + self.cooldown
-        if time.time() >= self.time_next_attack:
+            self.last_attack_time = pygame.time.get_ticks()
+            self.time_next_attack = self.last_attack_time + (self.cooldown * 1000)
+        if pygame.time.get_ticks() >= self.time_next_attack:
             print('attack')
             towervar.ishit(self.damage)
             self.last_attack_time = 0
