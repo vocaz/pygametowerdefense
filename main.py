@@ -4,7 +4,6 @@ import random
 from monsters import *
 from assets import *
 from towers import *
-
 #pygame setup
 clock = pygame.time.Clock()
 reallength = 320
@@ -95,8 +94,18 @@ def handle_monsters():
     global monster_lanes
     for index, monster in sorted(enumerate(monsters), reverse = True):
         monster.update(grid)
-        monster.draw(realwindow)
         monster_lanes[monster.lane] = [monster.cords["x"], monster.cords["y"]]
+        monster.draw(realwindow)
+        for index2, projectile in sorted(enumerate(projectiles)):
+            if isinstance(projectile, Bullet):
+                if monster.rect().colliderect(projectile.get_rect()):
+                    monster.ishit(projectile.damage)
+                    projectiles.pop(index2)
+                    print(monster.totalhp)
+                if monster.totalhp <= 0:
+                    monster_lanes[monster.lane] = 0
+                    print(monster_lanes)
+                    monsters.pop(index)
 def spawn_monster():
     lanes = [0,1,2,3,4]
     try:
@@ -286,9 +295,8 @@ def handle_projectiles():
         projectile.update()
         projectile.draw(realwindow)
         if projectile.range != 0:
-            print(projectile.origin[0])
             print(projectile.range * 24)
-            if projectile.cur_cords[0] - projectile.origin[0] >= projectile.range * 24:
+            if projectile.distance_moved >= projectile.range * 24:
                 kill_bullet = True
         if projectile.cur_cords[0] > 352 or -32 > projectile.cur_cords[1]:
             kill_bullet = True

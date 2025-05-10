@@ -59,7 +59,7 @@ class tambourine(Tower):
         self.img = assets.Images["towers"][self.typeid]
         tambourine.instances.append(self)
     def update(self,monster_lanes,projectiles):
-        if monster_lanes[self.cords["y"]]:
+        if monster_lanes[self.cords["y"]] != 0:
             if monster_lanes[self.cords["y"]][0] <= (24*self.range + self.cords["x"]*24 + 100):
                 self.tryattack(((self.cords['x']*24 + 100),(self.cords['y']*24+30)),projectiles)
     def tryattack(self,origin,projectiles):
@@ -67,5 +67,5 @@ class tambourine(Tower):
             self.last_attack_time = pygame.time.get_ticks()
             self.time_next_attack = self.last_attack_time + (self.cooldown * 1000)
         if pygame.time.get_ticks() >= self.time_next_attack:
-            projectiles.append(Bullet(1,[origin[0],origin[1]],[2,0],100,2))
+            projectiles.append(Bullet(1,[origin[0],origin[1]],[2,0],self.damage,0))
             self.last_attack_time = 0

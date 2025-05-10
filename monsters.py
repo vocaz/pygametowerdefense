@@ -2,6 +2,7 @@ import pygame
 import time
 from pygame.locals import *
 from assets import *
+from bullets import *
 class Monster:
     cooldown = 1
     typeid = -1
@@ -10,7 +11,6 @@ class Monster:
     damage = -1
     armor = -1
     hasarmor = False
-    totalhp = health + armor
     surface = []
     last_attack_time = 0
     time_next_attack = 0
@@ -18,6 +18,7 @@ class Monster:
     def __init__(self,lane):
         self.cords = {"x":304,"y":(lane*24)+24}
         self.lane = lane
+        self.totalhp = self.health + self.armor
     def update(self,grid):
         self.ismoving = True
         for tower in grid[self.lane]:
@@ -37,11 +38,11 @@ class Monster:
             self.last_attack_time = 0
     def ishit(self,damage):
         #Runs when either collides with a projectile or is hit by a melee range character
-        if hasarmor == True:
-            totalhealth -= damage
-            if totalhealth < health:
-                armorbreak()
-        if totalhealth < 0:
+        if self.hasarmor == True:
+            self.totalhp -= damage
+            if self.totalhp < self.health:
+                self.armorbreak()
+        if self.totalhp < 0:
             pass
     def armorbreak(self):
         hasarmor = False
@@ -52,8 +53,8 @@ class Monster:
         return pygame.Rect(self.cords["x"]+5, self.cords["y"]+16, 6, 16)
 class RobZombie(Monster):
     def __init__(self,lane):
-        self.health = 190
-        self.armor = 1100
+        self.health = 181
+        self.armor = 0
         self.movespeed = 0.050
         self.damage = 100
         Monster.__init__(self,lane)
