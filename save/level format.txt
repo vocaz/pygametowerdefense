@@ -1,0 +1,3 @@
+#comma separated
+#line 1 - all available plants
+#line 2 to infinity - (id of zombie to be spawned),(time in seconds until next zombie spawns)

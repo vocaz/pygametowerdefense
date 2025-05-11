@@ -33,7 +33,6 @@ class Monster:
             self.last_attack_time = pygame.time.get_ticks()
             self.time_next_attack = self.last_attack_time + (self.cooldown * 1000)
         if pygame.time.get_ticks() >= self.time_next_attack:
-            print('attack')
             towervar.ishit(self.damage)
             self.last_attack_time = 0
     def ishit(self,damage):
@@ -42,8 +41,8 @@ class Monster:
             self.totalhp -= damage
             if self.totalhp < self.health:
                 self.armorbreak()
-        if self.totalhp < 0:
-            pass
+        else:
+            self.totalhp -= damage
     def armorbreak(self):
         hasarmor = False
         armor = 0
@@ -55,10 +54,42 @@ class RobZombie(Monster):
     def __init__(self,lane):
         self.health = 181
         self.armor = 0
-        self.movespeed = 0.050
+        self.movespeed = 0.03
         self.damage = 100
         Monster.__init__(self,lane)
-        self.hasarmor = True
+        self.hasarmor = False
         self.typeid = 1
         self.img = assets.Images["monsters"][self.typeid]
-        
+class Buckethead(Monster):
+    def __init__(self,lane):
+        self.health = 181
+        self.armor = 300
+        self.movespeed = 0.03
+        self.damage = 100
+        Monster.__init__(self, lane)
+        self.hasarmor = True
+        self.typeid = 2
+        self.armor_img = assets.Images["monsters"][self.typeid]
+        self.noarmor_img = assets.Images["monsters"][1]
+        self.img = self.armor_img
+    def armorbreak(self):
+        self.img = self.noarmor_img
+        self.hasarmor = False
+        self.armor = 0
+class IronMaiden(Monster):
+    def __init__(self,lane):
+        self.armor = 50
+        self.health = 181
+        self.movespeed = 0.3
+        self.damage = 100
+        Monster.__init__(self, lane)
+        self.hasarmor = True
+        self.typeid = 3
+        self.armor_img = assets.Images["monsters"][self.typeid][0]
+        self.noarmor_img = assets.Images["monsters"][self.typeid][1]
+        self.img = self.armor_img
+    def armorbreak(self):
+        self.img = self.noarmor_img
+        self.hasarmor = False
+        self.armor = 0
+        self.movespeed = 0.03
