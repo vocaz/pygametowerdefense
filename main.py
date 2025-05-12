@@ -31,7 +31,7 @@ monsters = []
 spawn_index = 0
 
 #playtime management
-fancount = 50
+fancount = 500
 time_of_last_fan = 0
 projectiles = []
 monster_lanes = [0,0,0,0,0]
@@ -219,10 +219,9 @@ def level_manager(spawn_list,levelnum,new_level,available_towers):
                         monster_class = IronMaiden
                 zombie_timer = int(splitline[1])
                 spawn_list.append([monster_class,zombie_timer])
-def fan_manager(): #update fan count, as well as spawn new fan pickups
+def fan_manager(fancount): #spawn new fan pickups as well as draw fan count for ui
     global time_of_last_fan
     global time_of_next_fan
-    global fancount
     icon_surf = assets.Images["fans"]["counter"]
     icon_surf = pygame.transform.scale_by(icon_surf,2)
     icon_rect = icon_surf.get_rect(topleft=(5,0))
@@ -233,7 +232,7 @@ def fan_manager(): #update fan count, as well as spawn new fan pickups
         if pygame.time.get_ticks() >= time_of_next_fan:
             projectiles.append(Sun([random.randint(40, 260),0], [0, 0.1]))
             time_of_last_fan = 0
-    realwindow.blit(size23.render("{:,}".format(fancount), False, (255, 255, 255)), (45, 12))
+    realwindow.blit(size23.render("{:,}".format(fancount), False, (255, 255, 255)), (43, 12))
     realwindow.blit(icon_surf, icon_rect)
 def kill_tower(towervar):
     target_cords = [towervar.cords["x"], towervar.cords["y"]]
@@ -305,6 +304,7 @@ def spawn_monsters(spawn_list):
             spawn_index += 1
     else:
         if len(monsters) == 0:
+            reset_grid()
             cur_level += 1
             stats_from_session['cur_level'] = cur_level
             with open('save/stats.txt', 'wb') as stats_file:
@@ -312,6 +312,7 @@ def spawn_monsters(spawn_list):
             is_newlevel = True
             at_intermission = True
             available_towers = []
+            spawn_index = 0
 def closing(stats_from_session):
     global running
     scaledwindow.fill((0,0,0))
@@ -491,11 +492,10 @@ def handle_projectiles(projectiles):
             projectiles.pop(i)
 def fan_collection(projectiles):
     global fancount
-    global current_tower
     for i, projectile in sorted(enumerate(projectiles), reverse=True):
         if isinstance(projectile, Sun):
             if projectile.rect().collidepoint(get_pos(1, mouse_pos)) and click == 1:
-                current_tower = 0
+                reset_towerselection()
                 fancount += projectile.value
                 stats_from_session['fansgenerated'] += projectile.value
                 projectiles.pop(i)
@@ -555,7 +555,7 @@ while running == True:
         fan_collection(projectiles)
         update_grid(grid,projectiles,click)
         handle_projectiles(projectiles)
-        fan_manager()
+        fan_manager(fancount)
         handle_monsters()
         newwindow = pygame.transform.scale(realwindow,(scaledlength,scaledheight))
         scaledwindow.blit(newwindow, position) #draw the new upscaled onto scaled window
