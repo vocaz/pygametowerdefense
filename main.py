@@ -23,7 +23,7 @@ assets.load()
 
 #level storage and spawning
 spawn_list = []
-is_newlevel = True
+is_new_level = True
 last_spawn = 0
 next_spawn = 0
 lastspawnedlane = -1
@@ -31,7 +31,7 @@ monsters = []
 spawn_index = 0
 
 #playtime management
-fancount = 500
+fan_count = 50
 time_of_last_fan = 0
 projectiles = []
 monster_lanes = [0,0,0,0,0]
@@ -149,7 +149,10 @@ def intermission(cur_level,available_towers,stats_from_session):
         #draw available towers
         midleft_x = 15
         for tower in available_towers:
-            preview_surface = assets.Images['towers'][tower.typeid]
+            try:
+                preview_surface = assets.Images['towers'][tower.typeid][0]
+            except:
+                preview_surface = assets.Images['towers'][tower.typeid]
             preview_surface = pygame.transform.scale_by(preview_surface,5)
             tower_rect = preview_surface.get_rect()
             tower_rect.midleft = (midleft_x, 350)
@@ -188,15 +191,22 @@ def level_manager(spawn_list,levelnum,new_level,available_towers):
         level_file = f'save/level{levelnum}.txt'
         if not os.path.isfile(level_file):
             scaledwindow.fill((0, 0, 0))
-            draw_front_and_centre_text("All Levels Finished", (255, 255, 255))
+            draw_front_and_centre_text("All Levels Finished", pygame.Color('white'))
+            try_again_text = size16.render("To try the level again,", True, pygame.Color('white'))
+            try_again_text2 = size16.render("close the game and delete the stats.txt in the save folder", True, pygame.Color('white'))
+            try_again_text_rect = try_again_text.get_rect(center=(scaledlength // 2, scaledheight // 2 + 100))
+            try_again_text2_rect = try_again_text2.get_rect(center=(scaledlength // 2, scaledheight // 2 + 130))
+            scaledwindow.blit(try_again_text, try_again_text_rect)
+            scaledwindow.blit(try_again_text2, try_again_text2_rect)
             pygame.display.update()
-            time.sleep(1)
+            time.sleep(4)
             running = False
             pygame.quit()
         else:
             file = open(level_file,'r')
             lines = file.read().splitlines()
             file.close()
+            #load the line with available towers (the first one)
             towers_from_file = lines[0].split(',')
             for tower in towers_from_file:
                 match tower:
@@ -206,7 +216,7 @@ def level_manager(spawn_list,levelnum,new_level,available_towers):
                         available_towers.append(cd_player)
                     case "3":
                         available_towers.append(bassist)
-            lines = lines[1:]
+            lines = lines[1:] #delete the line with available towers so all thats left is spawns
             for line in lines:
                 splitline = line.split(',')
                 monster_class = splitline[0]
@@ -232,12 +242,11 @@ def fan_manager(fancount): #spawn new fan pickups as well as draw fan count for 
         if pygame.time.get_ticks() >= time_of_next_fan:
             projectiles.append(Sun([random.randint(40, 260),0], [0, 0.1]))
             time_of_last_fan = 0
-    realwindow.blit(size23.render("{:,}".format(fancount), False, (255, 255, 255)), (43, 12))
+    realwindow.blit(size23.render("{:,}".format(fancount), False, pygame.Color('white')), (43, 12))
     realwindow.blit(icon_surf, icon_rect)
 def kill_tower(towervar):
     target_cords = [towervar.cords["x"], towervar.cords["y"]]
     global grid
-    print(f'{towervar} killed')
     del towervar
     grid[target_cords[1]][target_cords[0]] = 0
 
@@ -264,18 +273,32 @@ def handle_monsters(): #update monsters (check for collision with towers or proj
 def failure(cur_level, dead):
     if dead == True:
         scaledwindow.fill(pygame.Color('black'))
-        game_over_text = size48.render(f'You died on level {cur_level}!', True, (255, 255, 255))
+        game_over_text = size48.render(f'You died on level {cur_level}!', True, pygame.Color('white'))
         game_over_text_rect = game_over_text.get_rect(center = (scaledlength // 2, scaledheight // 2))
         scaledwindow.blit(game_over_text, game_over_text_rect)
-        try_again_text = size32.render("To try the level again, close and re-open the game", True, (255, 255, 255))
+        try_again_text = size32.render("To try the level again, close and re-open the game", True, pygame.Color('white'))
         try_again_text_rect = try_again_text.get_rect(center = (scaledlength // 2, scaledheight // 2 + 100))
         scaledwindow.blit(try_again_text, try_again_text_rect)
         pygame.display.update()
-def spawn_monsters(spawn_list):
+def end_of_level():
+    global fan_count
     global available_towers
-    global is_newlevel
+    global is_new_level
     global cur_level
     global at_intermission
+    global spawn_index
+    fan_count = 50
+    reset_towerselection()
+    reset_grid()
+    cur_level += 1
+    stats_from_session['cur_level'] = cur_level
+    with open('save/stats.txt', 'wb') as stats_file:
+        pickle.dump(stats_from_session, stats_file)
+    is_new_level = True
+    at_intermission = True
+    available_towers = []
+    spawn_index = 0
+def spawn_monsters(spawn_list):
     global level_total_zombies
     global monsters
     global last_spawn
@@ -304,19 +327,11 @@ def spawn_monsters(spawn_list):
             spawn_index += 1
     else:
         if len(monsters) == 0:
-            reset_grid()
-            cur_level += 1
-            stats_from_session['cur_level'] = cur_level
-            with open('save/stats.txt', 'wb') as stats_file:
-                pickle.dump(stats_from_session, stats_file)
-            is_newlevel = True
-            at_intermission = True
-            available_towers = []
-            spawn_index = 0
+            end_of_level()
 def closing(stats_from_session):
     global running
     scaledwindow.fill((0,0,0))
-    draw_front_and_centre_text("Closing...", (255, 255, 255))
+    draw_front_and_centre_text("Closing...", pygame.Color('white'))
     pygame.display.update()
     with open('save/stats.txt', 'wb') as stats_file:
         pickle.dump(stats_from_session, stats_file)
@@ -367,7 +382,6 @@ def check_tomato(): #handle whether or not the user wishes to tomato a band memb
                 is_tomatoing = True
             elif is_tomatoing == True:
                 is_tomatoing = False
-            print(is_tomatoing)
     scaledwindow.blit(keyed_tomato_scaled, tomato_rect_scaled)
 def show_notenoughfans():
     global endframetextduration
@@ -391,7 +405,7 @@ def check_towerselection(fancount): #draw the buttons for each tower on screen, 
         icon_rect = icon_surf.get_rect(center = (button_surf.get_width()/2,button_surf.get_height()/2))
         icon_rect.move_ip(15,0)
         button_surf.blit(icon_surf,icon_rect)
-        button_surf.blit(size16.render("{:,}".format(towertype.cost), False, (255, 255, 255)), (5, 4))
+        button_surf.blit(size16.render("{:,}".format(towertype.cost), False, pygame.Color('white')), (5, 4))
         button_rect = button_surf.get_rect(center=(40, y * 20 + 60))
         if button_rect.collidepoint(get_pos(1, mouse_pos)[0], get_pos(1, mouse_pos)[1]):
             hovered = True
@@ -428,7 +442,7 @@ def check_towerselection(fancount): #draw the buttons for each tower on screen, 
 def update_grid(gridvar, projectiles, click): #check for updates on towers (the drawing of towers is included in this section of runtime)
     global monster_lanes #global as many functions use this same variable
     global is_tomatoing #updated in another function before being used
-    global fancount #must get changed in multiple functions
+    global fan_count #must get changed in multiple functions
     hovered = False
     y = 0
     for row in gridvar:
@@ -464,6 +478,7 @@ def update_grid(gridvar, projectiles, click): #check for updates on towers (the 
                     if is_tomatoing == True:
                         if tile != 0:
                             print(f'Tomatoed {tile.name}')
+                            fan_count += tile.cost // 3
                             del tile
                             grid[y][x] = 0
                             is_tomatoing = False
@@ -471,7 +486,7 @@ def update_grid(gridvar, projectiles, click): #check for updates on towers (the 
                         if current_tower == 0:
                             pass
                         else:
-                            fancount -= current_tower.cost
+                            fan_count -= current_tower.cost
                             grid[y][x] = current_tower(cords)
                             reset_towerselection()
             hovered = False
@@ -491,12 +506,12 @@ def handle_projectiles(projectiles):
         if kill_bullet:
             projectiles.pop(i)
 def fan_collection(projectiles):
-    global fancount
+    global fan_count
     for i, projectile in sorted(enumerate(projectiles), reverse=True):
         if isinstance(projectile, Sun):
             if projectile.rect().collidepoint(get_pos(1, mouse_pos)) and click == 1:
                 reset_towerselection()
-                fancount += projectile.value
+                fan_count += projectile.value
                 stats_from_session['fansgenerated'] += projectile.value
                 projectiles.pop(i)
 running = True
@@ -508,13 +523,11 @@ while running == True:
         if event.type == pygame.QUIT:
             closing(stats_from_session)
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_r:
-                reset_grid()
-            elif event.key == pygame.K_1:
+            if event.key == pygame.K_1:
                 if current_tower == available_towers[0]:
                     reset_towerselection()
                 else:
-                    if available_towers[0].cost > fancount:
+                    if available_towers[0].cost > fan_count:
                         show_notenoughfans()
                     else:
                         current_tower = available_towers[0]
@@ -523,7 +536,7 @@ while running == True:
                     if current_tower == available_towers[1]:
                         reset_towerselection()
                     else:
-                        if available_towers[1].cost > fancount:
+                        if available_towers[1].cost > fan_count:
                             show_notenoughfans()
                         else:
                             current_tower = available_towers[1]
@@ -534,7 +547,7 @@ while running == True:
                     if current_tower == available_towers[2]:
                         reset_towerselection()
                     else:
-                        if available_towers[2].cost > fancount:
+                        if available_towers[2].cost > fan_count:
                             show_notenoughfans()
                         else:
                             current_tower = available_towers[2]
@@ -542,8 +555,8 @@ while running == True:
                     pass
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             click = 1
-    level_manager(spawn_list, cur_level, is_newlevel, available_towers)
-    is_newlevel = False
+    level_manager(spawn_list, cur_level, is_new_level, available_towers)
+    is_new_level = False
     intermission(cur_level, available_towers, stats_from_session)
     start_menu(stats_from_session)
     if not at_menu and not at_intermission:
@@ -551,11 +564,11 @@ while running == True:
         realwindow.fill((0, 0, 0))
         mouse_pos = pygame.mouse.get_pos()
     if not at_menu and not at_intermission:
-        check_towerselection(fancount)
+        check_towerselection(fan_count)
         fan_collection(projectiles)
         update_grid(grid,projectiles,click)
         handle_projectiles(projectiles)
-        fan_manager(fancount)
+        fan_manager(fan_count)
         handle_monsters()
         newwindow = pygame.transform.scale(realwindow,(scaledlength,scaledheight))
         scaledwindow.blit(newwindow, position) #draw the new upscaled onto scaled window

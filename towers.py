@@ -56,7 +56,7 @@ class bassist(Tower):
     cost = 100
     range = 1
     damage = 50
-    health = 600
+    health = 800
     colour = (255,0,0)
     name = 'Bassist'
     attack_anim_frame_counter = 0
@@ -86,7 +86,7 @@ class bassist(Tower):
             self.last_attack_time = 0
 class cd_player(Tower):
     typeid = 3
-    cooldown = 24.25
+    cooldown = 12
     range = 0
     cost = 50
     health = 300

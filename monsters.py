@@ -80,7 +80,7 @@ class IronMaiden(Monster):
     def __init__(self,lane):
         self.armor = 50
         self.health = 181
-        self.movespeed = 0.3
+        self.movespeed = 0.1
         self.damage = 100
         Monster.__init__(self, lane)
         self.hasarmor = True
