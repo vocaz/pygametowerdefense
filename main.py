@@ -39,13 +39,6 @@ monster_lanes = [0,0,0,0,0]
 dospawn = 1
 spawn_fan = True
 
-#spawn system
-#colours
-white = (255,255,255)
-red = (255,0,0)
-green = (0,255,0)
-blue = (0,0,255)
-
 #input handling
 pos = 0
 mouse_pos = []
@@ -118,7 +111,7 @@ def start_menu(stats_from_session):
                     centre_text = centre_text.split("\n")
                     y_oftext = scaledheight // 2 - 20
                     for line in centre_text:
-                        closing_text = size48.render(line, True, white)
+                        closing_text = size48.render(line, True, pygame.Color('white'))
                         closing_text_rect = closing_text.get_rect()
                         closing_text_rect.center = (scaledlength // 2, y_oftext)
                         y_oftext += 48
@@ -143,13 +136,13 @@ def intermission(cur_level,available_towers,stats_from_session):
         centre_text = centre_text.split("\n")
         y_of_text = scaledheight // 2 - 50
         for line in centre_text:
-            line_text = size48.render(line, True, white)
+            line_text = size48.render(line, True, pygame.Color('white'))
             line_text_rect = line_text.get_rect()
             line_text_rect.center = (scaledlength // 2, y_of_text)
             y_of_text += 55
             scaledwindow.blit(line_text, line_text_rect)
         # draw bottom left text displaying available towers
-        available_text = size32.render('Available Towers:', True, white)
+        available_text = size32.render('Available Towers:', True, pygame.Color('white'))
         available_text_rect = available_text.get_rect()
         available_text_rect.midleft = (30, 300)
         scaledwindow.blit(available_text, available_text_rect)
@@ -166,25 +159,25 @@ def intermission(cur_level,available_towers,stats_from_session):
         #draw total monsters killed from save
         kill_text = f'You have killed:\n{"{:,}".format(stats_from_session["monsterkills"])}\nmonsters'
         kill_text = kill_text.split("\n")
-        line_1 = size32.render(kill_text[0], True, white)
+        line_1 = size32.render(kill_text[0], True, pygame.Color('white'))
         line_1_rect = line_1.get_rect(topleft=(20,10))
         scaledwindow.blit(line_1, line_1_rect)
-        line_2 = size48.render(kill_text[1], True, white)
+        line_2 = size48.render(kill_text[1], True, pygame.Color('white'))
         line_2_rect = line_2.get_rect(topleft=(20,50))
         scaledwindow.blit(line_2, line_2_rect)
-        line_3 = size32.render(kill_text[2], True, white)
+        line_3 = size32.render(kill_text[2], True, pygame.Color('white'))
         line_3_rect = line_3.get_rect(topleft=(20,110))
         scaledwindow.blit(line_3, line_3_rect)
         #draw total fans generated from save
         fans_text = f'You have generated:\n{"{:,}".format(stats_from_session["fansgenerated"])}\nfans'
         fans_text = fans_text.split("\n")
-        line_1 = size32.render(fans_text[0], True, white)
+        line_1 = size32.render(fans_text[0], True, pygame.Color('white'))
         line_1_rect = line_1.get_rect(topleft=(600,10))
         scaledwindow.blit(line_1, line_1_rect)
-        line_2 = size48.render(fans_text[1], True, white)
+        line_2 = size48.render(fans_text[1], True, pygame.Color('white'))
         line_2_rect = line_2.get_rect(topleft=(600,50))
         scaledwindow.blit(line_2, line_2_rect)
-        line_3 = size32.render(fans_text[2], True, white)
+        line_3 = size32.render(fans_text[2], True, pygame.Color('white'))
         line_3_rect = line_3.get_rect(topleft=(600,110))
         scaledwindow.blit(line_3, line_3_rect)
         pygame.display.update()
@@ -280,6 +273,7 @@ def failure(cur_level, dead):
         scaledwindow.blit(try_again_text, try_again_text_rect)
         pygame.display.update()
 def spawn_monsters(spawn_list):
+    global available_towers
     global is_newlevel
     global cur_level
     global at_intermission
@@ -514,9 +508,7 @@ while running == True:
         if event.type == pygame.QUIT:
             closing(stats_from_session)
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                dospawn = 1
-            elif event.key == pygame.K_r:
+            if event.key == pygame.K_r:
                 reset_grid()
             elif event.key == pygame.K_1:
                 if current_tower == available_towers[0]:
